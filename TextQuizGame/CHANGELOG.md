@@ -1,4 +1,4 @@
-## **Change Log**
+## **Changelog**
 ### **Version 1.0.0**
 ### **Added or Changed**
 * Created 3 options of help for the player
