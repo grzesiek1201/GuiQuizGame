@@ -7,6 +7,8 @@
 * Added more questions to pool
 
 
+
+
 ### **Version 1.1.0**
 ### **Added or Changed**
 * Created new module - QuizTimers
