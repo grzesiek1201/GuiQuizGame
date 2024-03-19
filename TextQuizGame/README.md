@@ -1,4 +1,3 @@
+Welcome to TextQuizGame - a simple text-based game that takes players on a journey through fundamental knowledge related to programming. The game offers questions that cover basic concepts and topics essential for beginner programmers. The content of the questions is based on elements that form the foundation in the world of programming.
 
-Zapraszam do odkrywania TextQuizGame - prostej gry tekstowej, która zabiera graczy w podróż przez fundamentalną wiedzę związana z programowaniem. Gra oferuje pytania, które dotyczą podstawowych pojęć i zagadnień, niezbędnych dla początkujących programistów. Zawartość pytania opiera się na elementach, które stanowią fundament w świecie programowania.
-
-TextQuizGame to nie tylko zabawna forma rozrywki, ale także świetne narzędzie edukacyjne, które pomaga w nauce podstawowych koncepcji związanych z programowaniem. Czy jesteś gotowy, by sprawdzić swoją wiedzę i równocześnie dobrze się bawić? Rozpocznij grę już teraz i pozwól, aby TextQuizGame wciągnęła Cię w świat kodowania!
+TextQuizGame is not just a fun form of entertainment, but also a great educational tool that helps in learning basic programming concepts. Are you ready to test your knowledge and have fun at the same time? Start the game now and let TextQuizGame immerse you in the world of coding!
