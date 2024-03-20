@@ -22,4 +22,4 @@
 * created json file for data storage(currently not used)
 * added main.py
 * refactoring the code
-* bufixes 
+* bugfixing timers on restarting the game
