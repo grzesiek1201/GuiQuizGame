@@ -1,5 +1,6 @@
 import random
 import Questions
+from QuizTimers import Timers
 
 
 class Game:
@@ -9,6 +10,9 @@ class Game:
         self.player_help_count = 10
         self.correct_answer = None
         self.current_question = None
+        self.shuffled_questions = self.questions_shuffle()
+        self.help_used = False
+        self.timers = Timers()
 
     def welcome_message(self):
         while True:
@@ -39,25 +43,31 @@ class Game:
         self.correct_answer = self.current_question["correct"]
 
     def half_answers(self):
-        question = self.questions_shuffle()[self.questions_count]
+        question = self.shuffled_questions[self.questions_count]
         correct_option = question["correct"]
         wrong_options = [option for option in question["answers"] if option != correct_option]
         random.shuffle(wrong_options)
         wrong_option = wrong_options[0]
-        remaining_options = [option for option in question["answers"] if
-                             option == correct_option or option == wrong_option]
-        new_answers = {option: question["answers"][option] for option in remaining_options}
-        question["answers"] = new_answers
-        print(f"There are two options left: {', '.join(remaining_options)}")
+        remaining_options = {option: answer for option, answer in question["answers"].items()
+                             if option == correct_option or option == wrong_option}
+        question_text = self.current_question["question"]
+        print(f"Question {self.questions_count + 1}: {question_text}")
+        for option, answer in remaining_options.items():
+            print(f"{option}: {answer}")
 
-    def printing_question(self):
-        shuffled_questions = self.questions_shuffle()
-        self.current_question = shuffled_questions[self.questions_count]
-        self.correct_player_answer()
+    def print_current_question(self):
         question_text = self.current_question["question"]
         print(f"Question {self.questions_count + 1}: {question_text}")
         for option, answer in self.current_question['answers'].items():
             print(f"{option}: {answer}")
+
+    def next_question(self):
+        if self.questions_count < len(self.shuffled_questions):
+            self.current_question = self.shuffled_questions[self.questions_count]
+            self.correct_player_answer()
+
+        else:
+            self.win_game()
 
     def lose_game(self):
         print(f"Game over! You scored {self.points} points.")
@@ -83,69 +93,95 @@ class Game:
         elif self.points >= 10:
             print("Keep learning and improving.")
 
-    def player_choice(self, player_input=""):
-        while self.questions_count < 20:
-            if not player_input.strip():
-                print("Please enter a valid input.")
-                self.printing_question()
-                player_input = input("Which answer is correct?: ")
-                continue
+    def help_next(self):
+        if self.player_help_count < 4:
+            print(f"You have run out of help points. Current help points: {self.player_help_count}")
+        else:
+            self.player_help_count -= 4
+            self.questions_count += 1
+            print(f"Let's move to another question. Current help points: {self.player_help_count}")
 
-            if player_input.lower() in ["a", "b", "c", "d"]:
-                if player_input == self.correct_answer:
-                    self.points += 1
-                    self.questions_count += 1
-                    print("Correct! Good Job! You earned 1 point.")
+    def help_half(self):
+        if self.player_help_count < 1:
+            print(f"You have run out of help points. Current help points: {self.player_help_count}")
+        else:
+            self.player_help_count -= 1
+            self.half_answers()
+            self.help_used = True
+            print(f"Two options left. Current help points: {self.player_help_count} ")
+
+    def help_time(self):
+        if self.player_help_count < 2:
+            print(f"You have run out of help points. Current help points: {self.player_help_count}")
+        else:
+            self.player_help_count -= 2
+            self.help_used = True
+            self.timers.help_add_time()
+            print(f"You have 30 seconds more to answer. Current help points: {self.player_help_count}")
+
+    def player_answer(self):
+        self.current_question = self.shuffled_questions[self.questions_count]
+        self.correct_player_answer()
+        if self.help_used == True:
+            self.player_input = input("Which answer is correct?: ")
+        else:
+            self.print_current_question()
+            self.player_input = input("Which answer is correct?: ")
+            self.help_used = False
+
+    def player_choice(self, player_input):
+        while self.questions_count < 20:
+            self.timers.start_time()
+            self.player_answer()
+
+            if self.player_input.lower() in ["a", "b", "c", "d"]:
+                if self.player_input == self.correct_answer:
+                    if self.timers.player_time > 20:
+                        self.points += 2
+                        self.questions_count += 1
+                        print("Correct! Good Job! You earned 2 point.")
+                        print(f"Current points: {self.points}")
+                        self.next_question()
+                    else:
+                        self.points += 1
+                        self.questions_count += 1
+                        print("Correct! Good Job! You earned 1 point.")
+                        print(f"Current points: {self.points}")
+                        self.next_question()
+                    self.timers.reset_question_timer()
+                elif self.timers.player_time == 0:
+                    print("Time is up. You lose.")
+                    self.lose_game()
                 else:
                     print(f"Incorrect answer. The correct answer was {self.correct_answer}.")
                     self.lose_game()
-                if self.questions_count < 20:
-                    self.printing_question()
-                    player_input = input("Which answer is correct?: ")
-            elif player_input.lower() == "help":
-                self.player_help_logic()
-                # If player used 'half' help, ask for input again
-                if self.questions_count < 20 and self.player_help_count >= 0:
-                    self.printing_question()
-                    player_input = input("Which answer is correct?: ")
+                    self.timers.reset_question_timer()
+
+            elif self.player_input.lower() == "help":
+                self.timers.help_pause_time()
+                self.input_help = input("Choose what kind of help would you like to use? (next/half/time): ")
+                if self.input_help.lower() == "next":
+                    self.help_next()
+                    self.timers.help_resume_time()
+                elif self.input_help.lower() == "half":
+                    self.help_half()
+                    self.timers.help_resume_time()
+                elif self.input_help.lower() == "time":
+                    self.help_time()
+                    self.timers.help_resume_time()
             else:
                 print("Invalid input. Please enter a, b, c, d, or help.")
+
         if self.questions_count == 20:
             self.win_game()
 
-    def player_help_logic(self):
-        input_help = input("Choose what kind of help would you like to use? (next/half/time): ")
-        if input_help.lower() == "next":
-            if self.player_help_count < 4:
-                print(f"You have run out of help points. Current help points: {self.player_help_count}")
-            else:
-                self.player_help_count -= 4
-                self.questions_count += 1
-                print(f"Let's move to another question. Current help points: {self.player_help_count}")
-                self.player_choice("")
-
-        elif input_help.lower() == "half":
-            if self.player_help_count < 1:
-                print(f"You have run out of help points. Current help points: {self.player_help_count}")
-            else:
-                self.player_help_count -= 1
-                self.half_answers()
-                print(f"One random wrong answer has been removed. Current help points: {self.player_help_count} ")
-                self.player_choice("")
-
-        elif input_help.lower() == "time":
-            if self.player_help_count < 2:
-                print(f"You have run out of help points. Current help points: {self.player_help_count}")
-            else:
-                self.player_help_count -= 2
-                print(f"You have 30 seconds more to answer. Current help points: {self.player_help_count}")
-                self.player_choice("")
-
     def run_game(self):
+        self.timers.reset_timer()
         self.points = 0
         self.questions_count = 0
         self.player_help_count = 10
         self.correct_answer = None
         self.current_question = None
+        self.help_used = False
         self.welcome_message()
         self.player_choice("")
