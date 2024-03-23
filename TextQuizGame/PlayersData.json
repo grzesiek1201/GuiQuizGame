@@ -1,6 +1,32 @@
-{
-  "player": "Zywy",
-  "points": 20,
-  "currentQuestion": 3,
-  "currentHelp": 10
-}
+[
+  {
+    "player": "Admin",
+    "points": 60,
+    "currentQuestion": 20,
+    "currentHelp": 10
+  },
+  {
+    "player": "Peter",
+    "points": 35,
+    "currentQuestion": 20,
+    "currentHelp": 0
+  },
+  {
+    "player": "Tomas",
+    "points": 32,
+    "currentQuestion": 20,
+    "currentHelp": 0
+  },
+  {
+    "player": "Catarina",
+    "points": 28,
+    "currentQuestion": 20,
+    "currentHelp": 0
+  },
+  {
+    "player": "Noob",
+    "points": 10,
+    "currentQuestion": 10,
+    "currentHelp": 6
+  }
+]
