@@ -1,13 +1,16 @@
 import random
 import Questions
 from QuizTimers import Timers
+from DataGame import Data
 
 
 class Game:
     def __init__(self):
+        self.data_manager = Data()
         self.points = 0
         self.questions_count = 0
         self.player_help_count = 10
+        self.help_extra_points = 0
         self.correct_answer = None
         self.current_question = None
         self.shuffled_questions = self.questions_shuffle()
@@ -15,14 +18,16 @@ class Game:
         self.timers = Timers()
 
     def welcome_message(self):
-        while True:
-            self.name_input = input("Hello! Tell us your name:")
-            if self.name_input.strip():
-                break
-            else:
-                print("Please enter a valid name.")
+        if not hasattr(self, 'name_input'):
+            while True:
+                self.name_input = input("Hello! Tell us your name:")
+                if self.name_input.strip():
+                    break
+                else:
+                    print("Please enter a valid name.")
+
         message = (
-            f"Welcome {self.name_input} in TextQuizGame! version 1.3a\n"
+            f"Welcome {self.name_input} in TextQuizGame! version 1.3b\n"
             "You will have to answer 20 questions.\n"
             "Of course, if you will have a trouble, you can ask for help by typing HELP.\n"
             "You have few options to choose for help, they are using different amount of points, which are:\n"
@@ -65,15 +70,23 @@ class Game:
         if self.questions_count < len(self.shuffled_questions):
             self.current_question = self.shuffled_questions[self.questions_count]
             self.correct_player_answer()
-
         else:
             self.win_game()
 
     def lose_game(self):
+        player_data = self.data_manager.get_player_data(self.name_input)
+        if player_data is not None:
+            self.data_manager.update_player(self.name_input, self.points)
+        else:
+            self.data_manager.add_player(self.name_input, self.points)
+
+
         print(f"Game over! You scored {self.points} points.")
+        self.data_manager.leaderboard()
         while True:
             restart_input = input('Type "restart" to try again, or "exit" to quit: ')
             if restart_input.lower() == "restart":
+                self.data_manager.reset_player_data(self.name_input)
                 self.run_game()
                 break
             elif restart_input.lower() == "exit":
@@ -81,8 +94,14 @@ class Game:
             else:
                 print("Invalid input. Please type 'restart' to try again or 'exit' to quit.")
 
+    def extra_points(self):
+        self.help_extra_points = self.player_help_count * 2
+        self.points = self.help_extra_points + self.points
+        print(f"You gain extra points for every NOT used help points. Your extra points {self.help_extra_points}")
+
     def win_game(self):
         print("Congratulations! You won!")
+        self.extra_points()
         print(f"You scored {self.points} points.")
         if self.points >= 40:
             print("You have incredible knowledge about programming!")
@@ -92,6 +111,14 @@ class Game:
             print("Not bad.")
         elif self.points >= 10:
             print("Keep learning and improving.")
+
+        player_data = self.data_manager.get_player_data(self.name_input)
+        if player_data is not None:
+            self.data_manager.update_player(self.name_input, self.points)
+        else:
+            self.data_manager.add_player(self.name_input, self.points)
+        self.data_manager.leaderboard()
+
 
     def help_next(self):
         if self.player_help_count < 4:
