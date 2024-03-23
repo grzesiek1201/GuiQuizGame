@@ -25,9 +25,18 @@
 * bugfixing timers on restarting the game
 
 ### **Version 1.3.a**
-### **Added or Changed*
+### **Added or Changed**
 * Bugfixing and refactoring timers
 * deleted module - GameHandling.py
 * refactoring module - TextQuizGame.py
 * improved point system
 * a lot of bugfixing in general
+
+### **Version 1.3.b**
+### **Added or Changed**
+* Updating restart function to not ask player for name again
+* added new module named DataGame - for storing players data
+* added leaderboard
+* after winning player receives additional score points for saving help points
+* added option to save and load game progress
+* bugfixing in general
