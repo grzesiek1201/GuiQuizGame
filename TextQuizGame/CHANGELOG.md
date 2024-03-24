@@ -40,3 +40,8 @@
 * after winning player receives additional score points for saving help points
 * added option to save and load game progress
 * bugfixing in general
+
+ ### **Version 1.3.c**
+### **Added or Changed**
+* Bugfixing leaderboard function to print proper information
+* Added more player scores to PlayersData.json to simulate leaderboard
