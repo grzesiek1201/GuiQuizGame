@@ -23,7 +23,8 @@ class Data:
 
     def leaderboard(self):
         sorted_players = sorted(self.players_data, key=lambda x: x['points'], reverse=True)
-        num_players = min(len(sorted_players), 15)
+        num_players = min(len(sorted_players), 10)
+        print("Top 10 Players:")
         for i, player in enumerate(sorted_players[:num_players], 1):
             print(f"{i}. {player['player']}: {player['points']} points")
 
@@ -79,3 +80,4 @@ class Data:
     def save_game_state(self, game_state, filename):
         with open(filename, 'w') as file:
             json.dump(game_state, file)
+
