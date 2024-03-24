@@ -82,6 +82,7 @@ class Game:
 
 
         print(f"Game over! You scored {self.points} points.")
+        self.data_manager.load_players_data()
         self.data_manager.leaderboard()
         while True:
             restart_input = input('Type "restart" to try again, or "exit" to quit: ')
@@ -117,8 +118,8 @@ class Game:
             self.data_manager.update_player(self.name_input, self.points)
         else:
             self.data_manager.add_player(self.name_input, self.points)
+        self.data_manager.load_players_data()
         self.data_manager.leaderboard()
-
 
     def help_next(self):
         if self.player_help_count < 4:
