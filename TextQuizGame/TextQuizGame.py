@@ -25,19 +25,35 @@ class Game:
                     break
                 else:
                     print("Please enter a valid name.")
-
         message = (
-            f"Welcome {self.name_input} in TextQuizGame! version 1.3b\n"
+            f"Welcome {self.name_input} in TextQuizGame! version 1.4\n"
             "You will have to answer 20 questions.\n"
             "Of course, if you will have a trouble, you can ask for help by typing HELP.\n"
             "You have few options to choose for help, they are using different amount of points, which are:\n"
             "next: 4 points\n"
             "time: 2 points\n"
             "half: 1 point\n"
+            "or\n"
+            "save: to save the game\n"
             f"Your total points: {self.player_help_count} \n"
         )
         print(message)
         input("Press ENTER to start the game...")
+
+    def load_game(self):
+        self.save_input = input("Would you like to load your last saved game? (YES/NO): ")
+        if self.save_input.lower() == "yes":
+            self.name_input = input("Enter your name: ")
+            game_state = self.data_manager.load_game_state(self.name_input)
+            if game_state is not None:
+                self.points = game_state["points"]
+                self.questions_count = game_state["currentQuestion"]
+                self.player_help_count = game_state["currentHelp"]
+                print("Game loaded successfully.")
+            else:
+                print("No saved game state found for this player.")
+        elif self.save_input.lower() == "no":
+            pass
 
     def questions_shuffle(self):
         shuffled_questions = list(Questions.questions.values())
@@ -79,7 +95,6 @@ class Game:
             self.data_manager.update_player(self.name_input, self.points)
         else:
             self.data_manager.add_player(self.name_input, self.points)
-
 
         print(f"Game over! You scored {self.points} points.")
         self.data_manager.load_players_data()
@@ -187,7 +202,7 @@ class Game:
 
             elif self.player_input.lower() == "help":
                 self.timers.help_pause_time()
-                self.input_help = input("Choose what kind of help would you like to use? (next/half/time): ")
+                self.input_help = input("Choose what kind of help would you like to use? (next/half/time/save): ")
                 if self.input_help.lower() == "next":
                     self.help_next()
                     self.timers.help_resume_time()
@@ -197,9 +212,18 @@ class Game:
                 elif self.input_help.lower() == "time":
                     self.help_time()
                     self.timers.help_resume_time()
+                elif self.input_help.lower() == "save":
+                    self.data_manager.update_player(
+                        self.name_input,
+                        self.points,
+                        current_question=self.questions_count,
+                        current_help=self.player_help_count
+                    )
+                    self.data_manager.save_game_state(self.name_input,self.points,self.questions_count, self.player_help_count)
+                    print("Game state saved. Game closing...")
+                    exit()
             else:
                 print("Invalid input. Please enter a, b, c, d, or help.")
-
         if self.questions_count == 20:
             self.win_game()
 
@@ -211,5 +235,6 @@ class Game:
         self.correct_answer = None
         self.current_question = None
         self.help_used = False
+        self.load_game()
         self.welcome_message()
         self.player_choice("")
