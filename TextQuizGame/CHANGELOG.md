@@ -47,3 +47,8 @@
 #### Added or Changed
 - Fixed leaderboard function to display accurate information
 - Expanded player scores in PlayersData.json to simulate a more comprehensive leaderboard
+
+### Version 1.4.0
+#### Added or Changed  
+- Fixed option to save and load game progress
+- Added folder named Saves to store players progress into save file
