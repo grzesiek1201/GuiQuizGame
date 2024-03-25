@@ -1,4 +1,5 @@
 import json
+import os
 
 
 class Data:
@@ -72,12 +73,23 @@ class Data:
                 player['currentHelp'] = 10
                 break
 
-    def load_game_state(self, filename):
-        with open(filename, 'r') as file:
-            game_state = json.load(file)
-        return game_state
+    def load_game_state(self, name_input):
+        player_save_file = f"Saves/{name_input}_save.json"
+        if os.path.exists(player_save_file):
+            with open(player_save_file, 'r') as file:
+                game_state = json.load(file)
+            return game_state
+        else:
+            print("No saved game state found.")
+            return None
 
-    def save_game_state(self, game_state, filename):
-        with open(filename, 'w') as file:
+    def save_game_state(self, name_input, points, questions_count, player_help_count):
+        player_save_file = f"Saves/{name_input}_save.json"
+        game_state = {
+            "player": name_input,
+            "points": points,
+            "currentQuestion": questions_count,
+            "currentHelp": player_help_count,
+        }
+        with open(player_save_file, 'w') as file:
             json.dump(game_state, file)
-
