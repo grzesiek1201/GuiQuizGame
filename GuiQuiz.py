@@ -30,7 +30,6 @@ class QuizGUI:
         self.after_game_gui()
         self.timer_running = False
 
-
     def create_welcome_gui(self):
         self.label = tk.Label(self.master, text="Welcome! Tell us your name!", font=("Helvetica", 12))
         self.label.pack(pady=150, anchor=tk.CENTER, expand=True)
@@ -45,11 +44,11 @@ class QuizGUI:
         self.name_button.pack()
 
     def game_gui(self):
-        self.start_button = tk.Button(self.master, text=" BEGIN", font=("Helvetica", 12), command= self.start_game)
+        self.start_button = tk.Button(self.master, text=" BEGIN", font=("Helvetica", 12), command=self.start_game)
 
-        self.load_player_label= tk.Label(self.master,text="Would you like to load your last saved game?", font=("Helvetica", 12))
-        self.yes_load_button= tk.Button(self.master, text= "YES")
-        self.no_load_button= tk.Button(self.master, text="NO")
+        self.load_player_label = tk.Label(self.master,text="Would you like to load your last saved game?", font=("Helvetica", 12))
+        self.yes_load_button = tk.Button(self.master, text="YES")
+        self.no_load_button = tk.Button(self.master, text="NO")
 
     def timer_gui(self):
         self.timer_label = tk.Label(self.master, text="", font=("Helvetica", 12))
@@ -84,7 +83,6 @@ class QuizGUI:
 
     def timer_finished(self):
         self.timer_running = False
-        # przegrana kod
         print("Timer finished!")
 
     def show_load_game(self):
@@ -93,12 +91,11 @@ class QuizGUI:
     def restart_game(self):
         self.data_manager.reset_player_data(self.name_input)
 
-
     def select_answer(self, answer):
         self.selected_answer = answer
 
     def show_question(self, question):
-        self.label.config(text=question)
+        self.label.config(text=question, anchor=tk.CENTER, font=("Helvetica", 12))
 
         self.answer_a_button.pack()
         self.answer_b_button.pack()
@@ -143,7 +140,7 @@ class QuizGUI:
                                    "half: 1 point\n"
                                    "or\n"
                                    "save: to save the game\n"
-                                   f"Your total points:", font=("Helvetica", 12))
+                                   f"Your total points: ", font=("Helvetica", 12))
             self.name_entry.delete(0, tk.END)
             self.name_label.pack_forget()
             self.name_entry.pack_forget()
@@ -152,18 +149,86 @@ class QuizGUI:
         else:
             tk.messagebox.showerror("Error", "Please enter your name.")
 
-    def start_game(self, question):
-        self.show_question(question)
+    def start_game(self):
+        self.start_button.pack_forget()
+        self.show_question(self.shuffled_questions[self.questions_count])
+
+    def print_current_question(self, question):
+        self.label.config(text=question["question"])
+
+        self.answers_frame = tk.Frame(self.master)
+        self.answers_frame.pack()
+
+        self.selected_answer = tk.StringVar()  
+
+        for option, answer in question['answers'].items():
+            answer_button = tk.Radiobutton(self.answers_frame, text=answer, font=("Helvetica", 12),
+                                           variable=self.selected_answer, value=option)
+            answer_button.grid(row=0, padx=5, pady=5)
+
+        submit_button = tk.Button(self.master, text="Submit", font=("Helvetica", 12), command=self.submit_answer)
+        submit_button.pack(pady=10)
 
     def questions_shuffle(self):
         shuffled_questions = list(Questions.questions.values())
         random.shuffle(shuffled_questions)
         return shuffled_questions
 
+    def correct_player_answer(self):
+        self.correct_answer = self.current_question["correct"]
+
+    def half_answers(self):
+        question = self.shuffled_questions[self.questions_count]
+        correct_option = question["correct"]
+        wrong_options = [option for option in question["answers"] if option != correct_option]
+        random.shuffle(wrong_options)
+        wrong_option = wrong_options[0]
+        remaining_options = {option: answer for option, answer in question["answers"].items()
+                             if option == correct_option or option == wrong_option}
+        question_text = self.current_question["question"]
+        print(f"Question {self.questions_count + 1}: {question_text}")
+        for option, answer in remaining_options.items():
+            print(f"{option}: {answer}")
+
+    def next_question(self):
+        if self.questions_count < len(self.shuffled_questions):
+            self.current_question = self.shuffled_questions[self.questions_count]
+            self.correct_player_answer()
+        else:
+            self.win_game()
+
+    def win_game(self):
+        print("Congratulations! You won!")
+        self.extra_points()
+        print(f"You scored {self.points} points.")
+        if self.points >= 40:
+            print("You have incredible knowledge about programming!")
+        elif self.points >= 30:
+            print("Very Good.")
+        elif self.points >= 20:
+            print("Not bad.")
+        elif self.points >= 10:
+            print("Keep learning and improving.")
+
+        player_data = self.data_manager.get_player_data(self.name_input)
+        if player_data is not None:
+            self.data_manager.update_player(self.name_input, self.points)
+        else:
+            self.data_manager.add_player(self.name_input, self.points)
+        self.data_manager.load_players_data()
+        self.data_manager.leaderboard()
+
+    def extra_points(self):
+        self.help_extra_points = self.player_help_count * 2
+        self.points = self.help_extra_points + self.points
+        print(f"You gain extra points for every NOT used help points. Your extra points {self.help_extra_points}")
+
+
 def main():
     root = tk.Tk()
     app = QuizGUI(root)
     root.mainloop()
+
 
 if __name__ == "__main__":
     main()
