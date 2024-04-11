@@ -8,16 +8,16 @@ from DataGame import Data
 
 class QuizGUI:
     def __init__(self, master):
-        self.data_manager = Data()
         self.points = 0
         self.questions_count = 0
         self.player_help_count = 10
         self.help_extra_points = 0
         self.correct_answer = None
         self.current_question = None
-        self.shuffled_questions = self.questions_shuffle()
         self.help_used = False
         self.timers = Timers()
+        self.data_manager = Data()
+        self.shuffled_questions = self.questions_shuffle()
         self.master = master
         self.master.title("Gui Quiz Game")
         self.master.geometry("800x600")
@@ -27,8 +27,6 @@ class QuizGUI:
         self.game_gui()
         self.help_gui()
         self.answer_gui()
-        self.after_game_gui()
-        self.timer_running = False
 
     def create_welcome_gui(self):
         self.label = tk.Label(self.master, text="Welcome! Tell us your name!", font=("Helvetica", 12))
@@ -45,21 +43,14 @@ class QuizGUI:
 
     def game_gui(self):
         self.start_button = tk.Button(self.master, text=" BEGIN", font=("Helvetica", 12), command=self.start_game)
-
-        self.load_player_label = tk.Label(self.master,text="Would you like to load your last saved game?", font=("Helvetica", 12))
-        self.yes_load_button = tk.Button(self.master, text="YES")
-        self.no_load_button = tk.Button(self.master, text="NO")
-
-    def timer_gui(self):
-        self.timer_label = tk.Label(self.master, text="", font=("Helvetica", 12))
-        self.timer_label.place(relx=0.9, rely=0.05, anchor=tk.CENTER)
+        self.load_button = tk.Button(self.master, text="LOAD GAME",font=("Helvetica", 12))
 
     def help_gui(self):
         self.help_button = tk.Button(self.master, text="Help", font=("Helvetica", 12), command=self.show_help_buttons)
         self.next_button = tk.Button(self.master, text="next", font=("Helvetica", 12), command=self.help_next)
         self.half_button = tk.Button(self.master, text="half", font=("Helvetica", 12), command=self.help_half)
         self.time_button = tk.Button(self.master, text="time", font=("Helvetica", 12), command=self.help_time)
-        self.save_button = tk.Button(self.master, text="save game", font=("Helvetica", 12))
+        self.save_button = tk.Button(self.master, text="save game", font=("Helvetica", 12), command=self.load_game)
 
     def answer_gui(self):
         self.answer_a_button = tk.Button(self.master, text="A", font=("Helvetica", 12), command=lambda: self.select_answer("A"))
@@ -67,40 +58,23 @@ class QuizGUI:
         self.answer_c_button = tk.Button(self.master, text="C", font=("Helvetica", 12), command=lambda: self.select_answer("C"))
         self.answer_d_button = tk.Button(self.master, text="D", font=("Helvetica", 12), command=lambda: self.select_answer("D"))
 
-    def after_game_gui(self):
-        self.restart_button = tk.Button(self.master, text="Restart", command=self.restart_game)
-        self.exit_button = tk.Button(self.master, text="Exit", command=exit)
-
     def help_points_gui(self):
-        self.help_points_label = tk.Label(self.master,text=f"Help points:{self.player_help_count} ")
+        self.help_points_label = tk.Label(self.master, text=f"Help points:{self.player_help_count} ", font=("Helvetica", 12))
+        self.help_points_label.place(relx=0.95, rely=0.05, anchor=tk.NE)
 
     def game_points_gui(self):
-        self.game_points_label= tk.Label(self.master, text=f"Score: {self.points}")
-
-    def start_timer(self):
-        self.timer_running = True
-        self.master.after(30000, self.timer_finished)
-
-    def timer_finished(self):
-        self.timer_running = False
-        print("Timer finished!")
-
-    def show_load_game(self):
-        self.load_player_label.pack()
-
-    def restart_game(self):
-        self.data_manager.reset_player_data(self.name_input)
-
-    def select_answer(self, answer):
-        self.selected_answer = answer
+        self.game_points_label = tk.Label(self.master, text=f"Score: {self.points}", font=("Helvetica", 12))
+        self.game_points_label.place(relx=0.95, rely=0.1, anchor=tk.NE)
 
     def show_question(self, question):
-        self.label.config(text=question, anchor=tk.CENTER, font=("Helvetica", 12))
+        self.label.config(text=question, font=("Helvetica", 12))
+        self.label.pack(anchor=tk.CENTER)
 
-        self.answer_a_button.pack()
-        self.answer_b_button.pack()
-        self.answer_c_button.pack()
-        self.answer_d_button.pack()
+    def show_answers_options(self):
+        self.answer_a_button.pack(anchor=tk.S)
+        self.answer_b_button.pack(anchor=tk.S)
+        self.answer_c_button.pack(anchor=tk.S)
+        self.answer_d_button.pack(anchor=tk.S)
 
     def show_help_buttons(self):
         self.label.pack_forget()
@@ -146,12 +120,26 @@ class QuizGUI:
             self.name_entry.pack_forget()
             self.name_button.pack_forget()
             self.start_button.pack()
+            self.load_button.pack()
+            self.help_points_gui()
+            self.game_points_gui()
         else:
             tk.messagebox.showerror("Error", "Please enter your name.")
 
     def start_game(self):
         self.start_button.pack_forget()
+        self.load_button.pack_forget()
+        self.show_help_buttons()
         self.show_question(self.shuffled_questions[self.questions_count])
+        self.show_answers_options()
+
+    def select_answer(self, answer):
+        self.selected_answer = answer
+        self.correct_answer = self.current_question["correct"]
+        if self.selected_answer == self.correct_answer:
+            print("good")
+        else:
+            print("mo")
 
     def print_current_question(self, question):
         self.label.config(text=question["question"])
@@ -159,15 +147,15 @@ class QuizGUI:
         self.answers_frame = tk.Frame(self.master)
         self.answers_frame.pack()
 
-        self.selected_answer = tk.StringVar()  
+        self.selected_answer = tk.StringVar()
 
         for option, answer in question['answers'].items():
             answer_button = tk.Radiobutton(self.answers_frame, text=answer, font=("Helvetica", 12),
                                            variable=self.selected_answer, value=option)
-            answer_button.grid(row=0, padx=5, pady=5)
+            answer_button.grid()
 
         submit_button = tk.Button(self.master, text="Submit", font=("Helvetica", 12), command=self.submit_answer)
-        submit_button.pack(pady=10)
+        submit_button.pack(pady=10, row=0)
 
     def questions_shuffle(self):
         shuffled_questions = list(Questions.questions.values())
@@ -190,39 +178,8 @@ class QuizGUI:
         for option, answer in remaining_options.items():
             print(f"{option}: {answer}")
 
-    def next_question(self):
-        if self.questions_count < len(self.shuffled_questions):
-            self.current_question = self.shuffled_questions[self.questions_count]
-            self.correct_player_answer()
-        else:
-            self.win_game()
-
-    def win_game(self):
-        print("Congratulations! You won!")
-        self.extra_points()
-        print(f"You scored {self.points} points.")
-        if self.points >= 40:
-            print("You have incredible knowledge about programming!")
-        elif self.points >= 30:
-            print("Very Good.")
-        elif self.points >= 20:
-            print("Not bad.")
-        elif self.points >= 10:
-            print("Keep learning and improving.")
-
-        player_data = self.data_manager.get_player_data(self.name_input)
-        if player_data is not None:
-            self.data_manager.update_player(self.name_input, self.points)
-        else:
-            self.data_manager.add_player(self.name_input, self.points)
-        self.data_manager.load_players_data()
-        self.data_manager.leaderboard()
-
-    def extra_points(self):
-        self.help_extra_points = self.player_help_count * 2
-        self.points = self.help_extra_points + self.points
-        print(f"You gain extra points for every NOT used help points. Your extra points {self.help_extra_points}")
-
+    def load_game(self):
+        print("load")
 
 def main():
     root = tk.Tk()
