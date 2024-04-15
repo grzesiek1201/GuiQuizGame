@@ -23,11 +23,8 @@ class Data:
             file.truncate()
 
     def leaderboard(self):
-        sorted_players = sorted(self.players_data, key=lambda x: x['points'], reverse=True)
-        num_players = min(len(sorted_players), 10)
-        print("Top 10 Players:")
-        for i, player in enumerate(sorted_players[:num_players], 1):
-            print(f"{i}. {player['player']}: {player['points']} points")
+        self.sorted_players = sorted(self.players_data, key=lambda x: x['points'], reverse=True)
+        self.num_players = min(len(self.sorted_players), 10)
 
     def add_player(self, player_name, points, current_question=0, current_help=10):
         player_exists = False
