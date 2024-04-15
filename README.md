@@ -1,6 +1,6 @@
-# Text Quiz Game
+# GUI Quiz Game
 
-Welcome to Text Quiz Game! This is a simple text-based quiz game built in Python.
+Welcome to GUIt Quiz Game! This is a simple text-based quiz game built in Python. Based on Text Quiz Game.
 
 ## Overview
 
@@ -18,13 +18,13 @@ Text Quiz Game challenges players to answer a series of programming-related ques
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/grzesiek1201/TextQuizGame.git
+    git clone https://github.com/grzesiek1201/GuiQuizGame.git
     ```
 
 2. Navigate to the project directory:
 
     ```bash
-    cd TextQuizGame
+    cd GuitQuizGame
     ```
 
 3. Run the game:
@@ -36,8 +36,8 @@ Text Quiz Game challenges players to answer a series of programming-related ques
 ## How to Play
 
 1. When you start the game, you'll be prompted to enter your name.
-2. Answer each question by typing the corresponding letter ("a", "b", "c", "d").
-3. Use the "help" command to access help options if needed.
+2. Answer each question by typing the choosing buttons ("a", "b", "c", "d").
+3. Use the help buttons to get help if needed.
 4. Earn points for correct answers and try to score as high as possible.
 5. Save your progress at any time to continue later.
 
