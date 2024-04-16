@@ -13,7 +13,9 @@
 
 ### Version 1.2.0
 #### Added or Changed
-
+- Bugfixing
+- Changing timers logic and display
+- 
 ### Version 1.3.0
 #### Added or Changed
 
