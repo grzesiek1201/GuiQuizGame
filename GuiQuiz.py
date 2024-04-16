@@ -85,6 +85,10 @@ class QuizGUI:
         self.restart_button = tk.Button(self.master, text="Restart", command=self.restart_game)
         self.exit_button = tk.Button(self.master, text="Exit", command=exit)
 
+    def timer_gui(self):
+        self.timer_label = tk.Label(self.master, text=f"Time left: {self.timers.player_time}", font=("Helvetica", 16), bg="yellow")
+        self.timer_label.place(relx=0.05, rely=0.05, anchor=tk.NW)
+
     def leaderboard_gui(self):
         self.data_manager.load_players_data()
         self.data_manager.leaderboard()
@@ -128,6 +132,7 @@ class QuizGUI:
             self.next_label.place(relx=0.50, rely=0.70, anchor=tk.S)
             time.sleep(2)
             self.question_answer()
+            self.timers.reset_question_timer()
 
     def help_half(self):
         if self.player_help_count < 1:
@@ -171,7 +176,7 @@ class QuizGUI:
     def welcome_game(self):
         self.name_input = self.name_entry.get().strip()
         if self.name_input:
-            self.label_welcome= self.label.config(text=f"Welcome {self.name_input} to TextQuizGame! version 1.5\n"
+            self.label_welcome= self.label.config(text=f"Welcome {self.name_input} to TextQuizGame! version 1.2\n"
                                    "You will have to answer 20 questions.\n"
                                    "You have a few options to choose for help, each using a different amount of points:\n"
                                    "next: 4 points\n"
@@ -191,6 +196,7 @@ class QuizGUI:
             tk.messagebox.showerror("Error", "Please enter your name.")
 
     def start_game(self):
+        self.timer_gui()
         self.answer_gui()
         self.question_answer()
         self.help_points_gui()
@@ -203,29 +209,26 @@ class QuizGUI:
 
     def select_answer(self, answer):
         time.sleep(3)
+        self.current_question = self.shuffled_questions[self.questions_count]
+        self.correct_player_answer()
         self.selected_answer = answer
         self.correct_answer = self.current_question["correct"]
         if self.selected_answer == self.correct_answer:
             self.good_label= tk.Label(self.master, text="Yes! That is correct answer!")
-
+            self.timers.reset_question_timer()
+            self.next_question()
         else:
             self.bad_label = tk.Label(self.master, text="Wrong! You lose!")
             self.after_game_gui()
+        if self.timers.time_up:
+            pass
 
     def correct_player_answer(self):
         self.correct_answer = self.current_question["correct"]
 
-    def player_answer(self):
-        self.current_question = self.shuffled_questions[self.questions_count]
-        self.correct_player_answer()
-        if self.help_used == True:
-            self.player_input = input("Which answer is correct?: ")
-        else:
-            self.print_current_question()
-            self.player_input = input("Which answer is correct?: ")
-            self.help_used = False
 
     def next_question(self):
+        self.timers.reset_question_timer()
         if self.questions_count < len(self.shuffled_questions):
             self.current_question = self.shuffled_questions[self.questions_count]
             self.correct_player_answer()
@@ -233,6 +236,7 @@ class QuizGUI:
             self.win_game()
 
     def print_current_question(self, question):
+        self.timers.start_time()
         self.answers_frame = tk.Frame(self.master)
         self.answers_frame.pack(anchor=tk.CENTER)
         question_text = question["question"] + "\n"
@@ -280,6 +284,86 @@ class QuizGUI:
         self.help_extra_points = self.player_help_count * 2
         self.points = self.help_extra_points + self.points
 
+    def win_game(self):
+        self.congrats_label = tk.Label(self.master, text="Congratulations! You won!", font=("Helvetica", 18),
+                                       bg="lightblue")
+        self.congrats_label.place(relx=0.5, rely=0.3, anchor=tk.CENTER)
+
+        self.extra_points()
+
+        self.score_label = tk.Label(self.master, text=f"You scored {self.points} points.", font=("Helvetica", 16),
+                                    bg="lightblue")
+        self.score_label.place(relx=0.5, rely=0.4, anchor=tk.CENTER)
+
+        if self.points >= 40:
+            self.feedback_label = tk.Label(self.master, text="You have incredible knowledge about programming!",
+                                           font=("Helvetica", 14), bg="lightblue")
+            self.feedback_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        elif self.points >= 30:
+            self.feedback_label = tk.Label(self.master, text="Very Good.", font=("Helvetica", 14), bg="lightblue")
+            self.feedback_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        elif self.points >= 20:
+            self.feedback_label = tk.Label(self.master, text="Not bad.", font=("Helvetica", 14), bg="lightblue")
+            self.feedback_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        elif self.points >= 10:
+            self.feedback_label = tk.Label(self.master, text="Keep learning and improving.", font=("Helvetica", 14),
+                                           bg="lightblue")
+            self.feedback_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+
+        player_data = self.data_manager.get_player_data(self.name_input)
+        if player_data is not None:
+            self.data_manager.update_player(self.name_input, self.points)
+        else:
+            self.data_manager.add_player(self.name_input, self.points)
+        self.data_manager.load_players_data()
+        self.data_manager.leaderboard()
+
+    def player_answer(self):
+        self.correct_player_answer()
+        if self.selected_answer is not None:
+            if self.selected_answer.lower() in ["A", "B", "C", "D"]:
+                if self.selected_answer == self.correct_answer:
+                    if self.timers.player_time > 20:
+                        self.points += 2
+                        self.questions_count += 1
+                        self.update_points_label()
+                        self.show_correct_answer_message()
+                        self.next_question()
+                    else:
+                        self.points += 1
+                        self.questions_count += 1
+                        self.update_points_label()
+                        self.show_correct_answer_message()
+                        self.next_question()
+                    self.timers.reset_question_timer()
+                elif self.timers.time_up:
+                    self.show_time_up_message()
+                    self.lose_game()
+                else:
+                    self.show_incorrect_answer_message()
+                    self.lose_game()
+                    self.timers.reset_question_timer()
+            self.selected_answer = None  # Reset selected answer
+
+    def update_points_label(self):
+        self.game_points_label.config(text=f"Score: {self.points}")
+
+    def show_correct_answer_message(self):
+        correct_label = tk.Label(self.master, text="Yes! That is the correct answer!", font=("Helvetica", 16),
+                                 bg="lightblue")
+        correct_label.pack(anchor=tk.CENTER)
+        correct_label.after(2000, correct_label.destroy)  # Destroy label after 2 seconds
+
+    def show_incorrect_answer_message(self):
+        incorrect_label = tk.Label(self.master, text=f"Wrong! The correct answer was {self.correct_answer}.",
+                                   font=("Helvetica", 16), bg="lightblue")
+        incorrect_label.pack(anchor=tk.CENTER)
+        incorrect_label.after(2000, incorrect_label.destroy)  # Destroy label after 2 seconds
+
+    def show_time_up_message(self):
+        time_up_label = tk.Label(self.master, text="Time is up!", font=("Helvetica", 16), bg="lightblue")
+        time_up_label.pack(anchor=tk.CENTER)
+        time_up_label.after(2000, time_up_label.destroy)  # Destroy label after 2 seconds
 
 def main():
     root = tk.Tk()
