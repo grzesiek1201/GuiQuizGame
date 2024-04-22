@@ -25,7 +25,6 @@ class QuizGUI:
         self.selected_answer = None
         self.create_welcome_gui()
 
-
     def create_welcome_gui(self):
         self.label = tk.Label(self.master, text="Welcome! Tell us your name!", font=("Helvetica", 20), bg="lightblue")
         self.label.pack(anchor=tk.CENTER, expand=True)
@@ -72,6 +71,7 @@ class QuizGUI:
     def question_answer(self):
         self.label_question_answer = tk.Label(self.master, text="Which answer you choose?",font=("Helvetica", 16), bg="lightblue")
         self.label_question_answer.place(relx=0.50, rely=0.80, anchor=tk.S)
+
 
     def help_points_gui(self):
         self.help_points_label = tk.Label(self.master, text=f"Help points:{self.player_help_count} ", font=("Helvetica", 14), bg="Yellow")
@@ -130,9 +130,11 @@ class QuizGUI:
             self.label_question_answer.forget()
             self.next_label= tk.Label(self.master, text=f"Let's move to another question. Current help points: {self.player_help_count}",font=("Helvetica", 16), bg="lightblue")
             self.next_label.place(relx=0.50, rely=0.70, anchor=tk.S)
+            self.next_label.after(6000, self.time_label.destroy)
             time.sleep(2)
             self.question_answer()
             self.timers.reset_question_timer()
+            self.help_points_label.config(text=f"Help points:{self.player_help_count} ")
 
     def help_half(self):
         if self.player_help_count < 1:
@@ -144,8 +146,10 @@ class QuizGUI:
             self.label_question_answer.forget()
             self.half_label= tk.Label(self.master, text=f"Two options left. Current help points: {self.player_help_count}",font=("Helvetica", 16), bg="lightblue")
             self.half_label.place(relx=0.50, rely=0.70, anchor=tk.S)
+            self.half_label.after(6000, self.time_label.destroy)
             time.sleep(2)
             self.question_answer()
+            self.help_points_label.config(text=f"Help points:{self.player_help_count} ")
 
     def help_time(self):
         if self.player_help_count < 2:
@@ -157,8 +161,10 @@ class QuizGUI:
             self.label_question_answer.forget()
             self.time_label= tk.Label(self.master, text=f"You have 30 seconds more to answer. Current help points: {self.player_help_count}",font=("Helvetica", 16), bg="lightblue")
             self.time_label.place(relx=0.50, rely=0.70, anchor=tk.S)
+            self.time_label.after(6000, self.time_label.destroy)
             time.sleep(2)
             self.question_answer()
+            self.help_points_label.config(text=f"Help points:{self.player_help_count} ")
 
     def half_answers(self):
         question = self.shuffled_questions[self.questions_count]
@@ -229,6 +235,7 @@ class QuizGUI:
 
     def next_question(self):
         self.timers.reset_question_timer()
+
         if self.questions_count < len(self.shuffled_questions):
             self.current_question = self.shuffled_questions[self.questions_count]
             self.correct_player_answer()
@@ -343,7 +350,7 @@ class QuizGUI:
                     self.show_incorrect_answer_message()
                     self.lose_game()
                     self.timers.reset_question_timer()
-            self.selected_answer = None  # Reset selected answer
+            self.selected_answer = None
 
     def update_points_label(self):
         self.game_points_label.config(text=f"Score: {self.points}")
@@ -352,18 +359,18 @@ class QuizGUI:
         correct_label = tk.Label(self.master, text="Yes! That is the correct answer!", font=("Helvetica", 16),
                                  bg="lightblue")
         correct_label.pack(anchor=tk.CENTER)
-        correct_label.after(2000, correct_label.destroy)  # Destroy label after 2 seconds
+        correct_label.after(2000, correct_label.destroy)
 
     def show_incorrect_answer_message(self):
         incorrect_label = tk.Label(self.master, text=f"Wrong! The correct answer was {self.correct_answer}.",
                                    font=("Helvetica", 16), bg="lightblue")
         incorrect_label.pack(anchor=tk.CENTER)
-        incorrect_label.after(2000, incorrect_label.destroy)  # Destroy label after 2 seconds
+        incorrect_label.after(2000, incorrect_label.destroy)
 
     def show_time_up_message(self):
         time_up_label = tk.Label(self.master, text="Time is up!", font=("Helvetica", 16), bg="lightblue")
         time_up_label.pack(anchor=tk.CENTER)
-        time_up_label.after(2000, time_up_label.destroy)  # Destroy label after 2 seconds
+        time_up_label.after(2000, time_up_label.destroy)  #
 
 def main():
     root = tk.Tk()
