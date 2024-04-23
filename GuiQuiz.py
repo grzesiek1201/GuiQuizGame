@@ -1,12 +1,12 @@
 import tkinter as tk
 from tkinter import messagebox
 import random
-import Questions
-from QuizTimers import Timers
-from DataGame import Data
 import time
 import os
 import sys
+import Questions
+from QuizTimers import Timers
+from DataGame import Data
 
 
 class QuizGUI:
