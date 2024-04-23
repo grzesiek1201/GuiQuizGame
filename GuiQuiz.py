@@ -5,6 +5,8 @@ import Questions
 from QuizTimers import Timers
 from DataGame import Data
 import time
+import os
+import sys
 
 
 class QuizGUI:
@@ -24,6 +26,8 @@ class QuizGUI:
         self.master.geometry("800x600")
         self.selected_answer = None
         self.create_welcome_gui()
+        self.player_time = self.timers.player_time
+
 
     def create_welcome_gui(self):
         self.label = tk.Label(self.master, text="Welcome! Tell us your name!", font=("Helvetica", 20), bg="lightblue")
@@ -69,9 +73,8 @@ class QuizGUI:
         self.answer_d_button.pack(side=tk.LEFT, padx=5)
 
     def question_answer(self):
-        self.label_question_answer = tk.Label(self.master, text="Which answer you choose?",font=("Helvetica", 16), bg="lightblue")
+        self.label_question_answer = tk.Label(self.master, text="Which answer you choose?", font=("Helvetica", 16), bg="lightblue")
         self.label_question_answer.place(relx=0.50, rely=0.80, anchor=tk.S)
-
 
     def help_points_gui(self):
         self.help_points_label = tk.Label(self.master, text=f"Help points:{self.player_help_count} ", font=("Helvetica", 14), bg="Yellow")
@@ -86,8 +89,14 @@ class QuizGUI:
         self.exit_button = tk.Button(self.master, text="Exit", command=exit)
 
     def timer_gui(self):
-        self.timer_label = tk.Label(self.master, text=f"Time left: {self.timers.player_time}", font=("Helvetica", 16), bg="yellow")
+        self.timer_label = tk.Label(self.master, text=f"Time left: {self.player_time}", font=("Helvetica", 16), bg="yellow")
         self.timer_label.place(relx=0.05, rely=0.05, anchor=tk.NW)
+        self.update_timer_label()
+
+    def update_timer_label(self):
+        self.player_time = self.timers.player_time
+        self.timer_label.config(text=f"Time left: {self.player_time}")
+        self.master.after(1000, self.update_timer_label)
 
     def leaderboard_gui(self):
         self.data_manager.load_players_data()
@@ -119,7 +128,7 @@ class QuizGUI:
         self.half_button.pack_forget()
 
     def points_label(self):
-        self.label_points= tk.Label(self.master, text=f"You have run out of help points. Current help points: {self.player_help_count}",font=("Helvetica", 16), bg="lightblue")
+        self.label_points= tk.Label(self.master, text=f"You have run out of help points. Current help points: {self.player_help_count}", font=("Helvetica", 16), bg="lightblue")
 
     def help_next(self):
         if self.player_help_count < 4:
@@ -128,7 +137,7 @@ class QuizGUI:
             self.player_help_count -= 4
             self.questions_count += 1
             self.label_question_answer.forget()
-            self.next_label= tk.Label(self.master, text=f"Let's move to another question. Current help points: {self.player_help_count}",font=("Helvetica", 16), bg="lightblue")
+            self.next_label= tk.Label(self.master, text=f"Let's move to another question. Current help points: {self.player_help_count}", font=("Helvetica", 16), bg="lightblue")
             self.next_label.place(relx=0.50, rely=0.70, anchor=tk.S)
             self.next_label.after(6000, self.time_label.destroy)
             time.sleep(2)
@@ -144,7 +153,7 @@ class QuizGUI:
             self.half_answers()
             self.help_used = True
             self.label_question_answer.forget()
-            self.half_label= tk.Label(self.master, text=f"Two options left. Current help points: {self.player_help_count}",font=("Helvetica", 16), bg="lightblue")
+            self.half_label= tk.Label(self.master, text=f"Two options left. Current help points: {self.player_help_count}", font=("Helvetica", 16), bg="lightblue")
             self.half_label.place(relx=0.50, rely=0.70, anchor=tk.S)
             self.half_label.after(6000, self.time_label.destroy)
             time.sleep(2)
@@ -159,7 +168,7 @@ class QuizGUI:
             self.help_used = True
             self.timers.help_add_time()
             self.label_question_answer.forget()
-            self.time_label= tk.Label(self.master, text=f"You have 30 seconds more to answer. Current help points: {self.player_help_count}",font=("Helvetica", 16), bg="lightblue")
+            self.time_label = tk.Label(self.master, text=f"You have 30 seconds more to answer. Current help points: {self.player_help_count}", font=("Helvetica", 16), bg="lightblue")
             self.time_label.place(relx=0.50, rely=0.70, anchor=tk.S)
             self.time_label.after(6000, self.time_label.destroy)
             time.sleep(2)
@@ -182,7 +191,7 @@ class QuizGUI:
     def welcome_game(self):
         self.name_input = self.name_entry.get().strip()
         if self.name_input:
-            self.label_welcome= self.label.config(text=f"Welcome {self.name_input} to TextQuizGame! version 1.2\n"
+            self.label_welcome = self.label.config(text=f"Welcome {self.name_input} to TextQuizGame! version 1.2\n"
                                    "You will have to answer 20 questions.\n"
                                    "You have a few options to choose for help, each using a different amount of points:\n"
                                    "next: 4 points\n"
@@ -213,29 +222,11 @@ class QuizGUI:
         self.print_current_question(self.shuffled_questions[self.questions_count])
         self.show_answers_options()
 
-    def select_answer(self, answer):
-        time.sleep(3)
-        self.current_question = self.shuffled_questions[self.questions_count]
-        self.correct_player_answer()
-        self.selected_answer = answer
-        self.correct_answer = self.current_question["correct"]
-        if self.selected_answer == self.correct_answer:
-            self.good_label= tk.Label(self.master, text="Yes! That is correct answer!")
-            self.timers.reset_question_timer()
-            self.next_question()
-        else:
-            self.bad_label = tk.Label(self.master, text="Wrong! You lose!")
-            self.after_game_gui()
-        if self.timers.time_up:
-            pass
-
     def correct_player_answer(self):
         self.correct_answer = self.current_question["correct"]
 
-
     def next_question(self):
         self.timers.reset_question_timer()
-
         if self.questions_count < len(self.shuffled_questions):
             self.current_question = self.shuffled_questions[self.questions_count]
             self.correct_player_answer()
@@ -249,10 +240,8 @@ class QuizGUI:
         question_text = question["question"] + "\n"
         for option, answer in question['answers'].items():
             question_text += f"{option}. {answer}\n"
-
-        self.question_label = tk.Label(self.master, text=question_text, font=("Helvetica", 18,"bold"), justify=tk.LEFT,bg="lightblue")
+        self.question_label = tk.Label(self.master, text=question_text, font=("Helvetica", 18, "bold"), justify=tk.LEFT, bg="lightblue")
         self.question_label.place(relx=0.5, rely=0.4, anchor=tk.CENTER)
-
         self.selected_answer = tk.StringVar()
 
     def questions_shuffle(self):
@@ -286,6 +275,7 @@ class QuizGUI:
 
     def restart_game(self):
         self.data_manager.reset_player_data(self.name_input)
+        os.execv(sys.executable, [sys.executable, *sys.argv])
 
     def extra_points(self):
         self.help_extra_points = self.player_help_count * 2
@@ -295,13 +285,10 @@ class QuizGUI:
         self.congrats_label = tk.Label(self.master, text="Congratulations! You won!", font=("Helvetica", 18),
                                        bg="lightblue")
         self.congrats_label.place(relx=0.5, rely=0.3, anchor=tk.CENTER)
-
         self.extra_points()
-
         self.score_label = tk.Label(self.master, text=f"You scored {self.points} points.", font=("Helvetica", 16),
                                     bg="lightblue")
         self.score_label.place(relx=0.5, rely=0.4, anchor=tk.CENTER)
-
         if self.points >= 40:
             self.feedback_label = tk.Label(self.master, text="You have incredible knowledge about programming!",
                                            font=("Helvetica", 14), bg="lightblue")
@@ -316,7 +303,6 @@ class QuizGUI:
             self.feedback_label = tk.Label(self.master, text="Keep learning and improving.", font=("Helvetica", 14),
                                            bg="lightblue")
             self.feedback_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
-
         player_data = self.data_manager.get_player_data(self.name_input)
         if player_data is not None:
             self.data_manager.update_player(self.name_input, self.points)
@@ -325,32 +311,48 @@ class QuizGUI:
         self.data_manager.load_players_data()
         self.data_manager.leaderboard()
 
-    def player_answer(self):
+    def lose_game(self):
+        player_data = self.data_manager.get_player_data(self.name_input)
+        if player_data is None:
+            self.data_manager.add_player(self.name_input, self.points)
+        else:
+            self.data_manager.update_player(self.name_input, self.points)
+        self.lose_label = tk.Label(text=f"Game over! You scored {self.points} points.")
+        self.lose_label.pack()
+        self.restart_button = tk.Button(text="RESTART", font=("Helvetica", 16), command=self.restart_game)
+        self.restart_button.pack()
+        self.exit_button = tk.Button(text="EXIT", font=("Helvetica", 16), command=self.quit)
+        self.exit_button.pack()
+
+    def quit(self):
+        exit()
+
+    def select_answer(self, answer):
+        time.sleep(1)
+        self.current_question = self.shuffled_questions[self.questions_count]
         self.correct_player_answer()
-        if self.selected_answer is not None:
-            if self.selected_answer.lower() in ["A", "B", "C", "D"]:
-                if self.selected_answer == self.correct_answer:
-                    if self.timers.player_time > 20:
-                        self.points += 2
-                        self.questions_count += 1
-                        self.update_points_label()
-                        self.show_correct_answer_message()
-                        self.next_question()
-                    else:
-                        self.points += 1
-                        self.questions_count += 1
-                        self.update_points_label()
-                        self.show_correct_answer_message()
-                        self.next_question()
-                    self.timers.reset_question_timer()
-                elif self.timers.time_up:
-                    self.show_time_up_message()
-                    self.lose_game()
-                else:
-                    self.show_incorrect_answer_message()
-                    self.lose_game()
-                    self.timers.reset_question_timer()
-            self.selected_answer = None
+        self.selected_answer = answer
+        self.correct_answer = self.current_question["correct"]
+        if self.selected_answer == self.correct_answer:
+            if self.player_time > 20:
+                self.points += 2
+                self.questions_count += 1
+                self.update_points_label()
+                self.show_correct_answer_message()
+                self.good_label = tk.Label(self.master, text="Yes! That is correct answer!")
+                self.next_question()
+            else:
+                self.points += 1
+                self.questions_count += 1
+                self.update_points_label()
+                self.show_correct_answer_message()
+                self.next_question()
+            self.timers.reset_question_timer()
+        else:
+            self.bad_label = tk.Label(self.master, text="Wrong! You lose!")
+            self.after_game_gui()
+        if self.player_time == 0:
+            pass
 
     def update_points_label(self):
         self.game_points_label.config(text=f"Score: {self.points}")
@@ -371,6 +373,7 @@ class QuizGUI:
         time_up_label = tk.Label(self.master, text="Time is up!", font=("Helvetica", 16), bg="lightblue")
         time_up_label.pack(anchor=tk.CENTER)
         time_up_label.after(2000, time_up_label.destroy)  #
+
 
 def main():
     root = tk.Tk()
