@@ -15,11 +15,12 @@
 #### Added or Changed
 - Bugfixing
 - Changing timers logic and display
-- 
+
 ### Version 1.3.0
 #### Added or Changed
-
-
+- Added leaderboard
+- Added gui after losing the game
+- Bugfixing
 
 ### Version 1.4.0
 #### Added or Changed
