@@ -77,7 +77,6 @@ class Data:
                 game_state = json.load(file)
             return game_state
         else:
-            print("No saved game state found.")
             return None
 
     def save_game_state(self, name_input, points, questions_count, player_help_count):
