@@ -168,17 +168,20 @@ class QuizGUI:
 
     def points_label(self):
         self.label_points= tk.Label(self.master, text=f"You have run out of help points. Current help points: {self.player_help_count}", font=("Helvetica", 16), bg="lightblue")
-
+        self.label_points.pack()
     def help_next(self):
         if self.player_help_count < 4:
             self.points_label()
         else:
+            self.next_question()
+            self.update_points_label()
+            self.timers.reset_question_timer()
             self.player_help_count -= 4
             self.questions_count += 1
             self.label_question_answer.forget()
             self.next_label= tk.Label(self.master, text=f"Let's move to another question. Current help points: {self.player_help_count}", font=("Helvetica", 16), bg="lightblue")
             self.next_label.place(relx=0.50, rely=0.70, anchor=tk.S)
-            self.next_label.after(6000, self.time_label.destroy)
+            self.next_label.after(6000, self.next_label.destroy)
             time.sleep(0.5)
             self.question_answer()
             self.timers.reset_question_timer()
@@ -189,12 +192,15 @@ class QuizGUI:
             self.points_label()
         else:
             self.player_help_count -= 1
-            self.half_answers()
             self.help_used = True
             self.label_question_answer.forget()
-            self.half_label= tk.Label(self.master, text=f"Two options left. Current help points: {self.player_help_count}", font=("Helvetica", 16), bg="lightblue")
+            self.half_answers()
+            self.show_half_options()
+            self.half_label = tk.Label(self.master,
+                                       text=f"Two options left. Current help points: {self.player_help_count}",
+                                       font=("Helvetica", 16), bg="lightblue")
             self.half_label.place(relx=0.50, rely=0.70, anchor=tk.S)
-            self.half_label.after(6000, self.time_label.destroy)
+            self.half_label.after(6000, self.half_label.destroy)
             time.sleep(0.5)
             self.question_answer()
             self.help_points_label.config(text=f"Help points:{self.player_help_count} ")
@@ -222,15 +228,27 @@ class QuizGUI:
         wrong_option = wrong_options[0]
         remaining_options = {option: answer for option, answer in question["answers"].items()
                              if option == correct_option or option == wrong_option}
-        question_text = self.current_question["question"]
-        print(f"Question {self.questions_count + 1}: {question_text}")
-        for option, answer in remaining_options.items():
-            print(f"{option}: {answer}")
+        self.remaining_options = remaining_options
+
+    def show_half_options(self):
+        self.answer_a_button.pack_forget()
+        self.answer_b_button.pack_forget()
+        self.answer_c_button.pack_forget()
+        self.answer_d_button.pack_forget()
+        for option, answer in self.remaining_options.items():
+            if option == self.current_question["correct"]:
+                correct_button = getattr(self, f"answer_{option}_button")
+                correct_button.config(text=option.upper(), command=lambda: self.select_answer(option))
+                correct_button.pack(side=tk.LEFT, padx=5)
+            else:
+                wrong_button = getattr(self, f"answer_{option}_button")
+                wrong_button.config(text=option.upper(), command=lambda: self.select_answer(option))
+                wrong_button.pack(side=tk.LEFT, padx=5)
 
     def welcome_game(self):
         self.name_input = self.name_entry.get().strip()
         if self.name_input:
-            self.label_welcome = self.label.config(text=f"Welcome {self.name_input} to TextQuizGame! version 1.3\n"
+            self.label_welcome = self.label.config(text=f"Welcome {self.name_input} to TextQuizGame! version 1.4\n"
                                    "You will have to answer 20 questions.\n"
                                    "You have a few options to choose for help, each using a different amount of points:\n"
                                    "next: 4 points\n"
@@ -291,7 +309,6 @@ class QuizGUI:
                                        bg="lightblue")
         self.question_label.place(relx=0.5, rely=0.4, anchor=tk.CENTER)
         self.selected_answer = tk.StringVar()
-
 
     def questions_shuffle(self):
         shuffled_questions = list(Questions.questions.values())
