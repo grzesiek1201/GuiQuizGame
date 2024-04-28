@@ -24,4 +24,7 @@
 
 ### Version 1.4.0
 #### Added or Changed
+- Fixed the issue with doubling timer counting
+- fixed NEXT help option logic
+- changed timers logic
 
