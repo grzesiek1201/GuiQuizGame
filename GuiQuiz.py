@@ -234,9 +234,9 @@ class QuizGUI:
         if self.player_help_count < 1:
             self.points_label()
         else:
-            if self.next_used == False:
+            if self.next_used_flag == False:
                 self.player_help_count -= 1
-                self.next_used = True
+                self.next_used_flag = True
                 self.correct_button_flag = True
                 self.wrong_button_flag = True
                 self.label_question_answer.forget()
@@ -247,7 +247,7 @@ class QuizGUI:
                 self.half_label.place(relx=0.50, rely=0.70, anchor=tk.S)
                 self.half_label.after(3000, self.half_label.destroy)
             else:
-                if self.next_used == True:
+                if self.next_used_flag == True:
                     self.next_already_used()
     def help_time(self):
         if self.player_help_count < 2:
