@@ -26,5 +26,11 @@
 #### Added or Changed
 - Fixed the issue with doubling timer counting
 - fixed NEXT help option logic
-- changed timers logic
+- Changed timers logic
 
+### Version 1.4.0
+#### Added or Changed
+- Fixed bug where time up didn't trigger lose
+- Fixed HALF button and answers buttons for it
+- Fixed NEXT button to properly moves to next question
+- Fixed point system
